@@ -1,0 +1,155 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'AWS CloudFormation template to create resources required to run tasks
+  on an ECS cluster.'
+Parameters:
+  AsgMaxSize:
+    Default: 1
+    Description: 'Maximum size and initial Desired Capacity of ECS Auto Scaling Group'
+    Type: Number
+  EcsAmiId:
+    Default: ami-c8337dbb
+    Description: 'ECS EC2 AMI id'
+    Type: String
+  EcsClusterName:
+    Default: default
+    Description: 'ECS Cluster Name'
+    Type: String
+  EcsInstanceType:
+    AllowedValues:
+      - t2.nano
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+      - m3.medium
+      - m3.large
+      - m3.xlarge
+      - m3.2xlarge
+      - m4.large
+      - m4.xlarge
+      - m4.2xlarge
+      - m4.4xlarge
+      - m4.10xlarge
+      - c4.large
+      - c4.xlarge
+      - c4.2xlarge
+      - c4.4xlarge
+      - c4.8xlarge
+      - c3.large
+      - c3.xlarge
+      - c3.2xlarge
+      - c3.4xlarge
+      - c3.8xlarge
+      - r3.large
+      - r3.xlarge
+      - r3.2xlarge
+      - r3.4xlarge
+      - r3.8xlarge
+      - i2.xlarge
+      - i2.2xlarge
+      - i2.4xlarge
+      - i2.8xlarge
+      - g2.2xlarge
+      - g2.8xlarge
+      - d2.xlarge
+      - d2.2xlarge
+      - d2.4xlarge
+      - d2.8xlarge
+    ConstraintDescription: 'must be a valid EC2 instance type.'
+    Default: t2.micro
+    Description: 'ECS EC2 instance type'
+    Type: String
+  EcsPort:
+    Default: 80
+    Description: 'Optional - Security Group port to open on ECS instances - defaults
+      to port 80'
+    Type: String
+  KeyName:
+    Default: admin
+    Description: 'Optional - Name of an existing EC2 KeyPair to enable SSH access
+      to the ECS instances'
+    Type: AWS::EC2::KeyPair::KeyName
+  SourceCidr:
+    Default: 0.0.0.0/0
+    Description: 'Optional - CIDR/IP range for EcsPort - defaults to 0.0.0.0/0'
+    Type: String
+  VpcId:
+    AllowedPattern: ^(?:vpc-[0-9a-f]{8}|)$
+    ConstraintDescription: 'VPC Id must begin with ''vpc-'' or leave blank to have
+      a new VPC created'
+    Description: 'Optional - VPC Id of existing VPC. Leave blank to have a new VPC
+      created'
+    Type: String
+Resources:
+  EcsCluster:
+    Properties:
+      ClusterName:
+        Ref: EcsClusterName
+    Type: AWS::ECS::Cluster
+  EcsInstanceAsg:
+    Properties:
+      AvailabilityZones:
+        Fn::GetAZs:
+          "AWS::Region"
+      DesiredCapacity:
+        Ref: AsgMaxSize
+      LaunchConfigurationName:
+        Ref: EcsInstanceLC
+      MaxSize:
+        Ref: AsgMaxSize
+      MinSize: 1
+    Type: AWS::AutoScaling::AutoScalingGroup
+  EcsInstanceLC:
+    Properties:
+      IamInstanceProfile:
+        Ref: EcsInstanceProfile
+      ImageId:
+        Ref: EcsAmiId
+      InstanceType:
+        Ref: EcsInstanceType
+      SecurityGroups:
+        - Ref: EcsSecurityGroup
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            - - "#!/bin/bash\n"
+              - 'echo ECS_CLUSTER='
+              - Ref: EcsClusterName
+              - " >> /etc/ecs/ecs.config\n"
+    Type: AWS::AutoScaling::LaunchConfiguration
+  EcsInstancePolicy:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
+      Path: /
+    Type: AWS::IAM::Role
+  EcsInstanceProfile:
+    Properties:
+      Path: /
+      Roles:
+        - Ref: EcsInstancePolicy
+    Type: AWS::IAM::InstanceProfile
+  EcsSecurityGroup:
+    Properties:
+      GroupDescription: 'ECS Allowed Ports'
+      SecurityGroupIngress:
+        - CidrIp:
+            Ref: SourceCidr
+          FromPort:
+            Ref: EcsPort
+          IpProtocol: tcp
+          ToPort:
+            Ref: EcsPort
+      VpcId:
+        Ref: VpcId
+    Type: AWS::EC2::SecurityGroup
