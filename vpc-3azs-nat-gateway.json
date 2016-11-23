@@ -142,7 +142,27 @@
 				}]
 			}
 		},
-		"RouteTablePrivate": {
+		"RouteTablePrivateA": {
+			"Type": "AWS::EC2::RouteTable",
+			"Properties": {
+				"VpcId": {"Ref": "VPC"},
+				"Tags": [{
+					"Key": "Name",
+					"Value": "Private"
+				}]
+			}
+		},
+    "RouteTablePrivateB": {
+			"Type": "AWS::EC2::RouteTable",
+			"Properties": {
+				"VpcId": {"Ref": "VPC"},
+				"Tags": [{
+					"Key": "Name",
+					"Value": "Private"
+				}]
+			}
+		},
+    "RouteTablePrivateC": {
 			"Type": "AWS::EC2::RouteTable",
 			"Properties": {
 				"VpcId": {"Ref": "VPC"},
@@ -163,7 +183,7 @@
 			"Type": "AWS::EC2::SubnetRouteTableAssociation",
 			"Properties": {
 				"SubnetId": {"Ref": "SubnetAPrivate"},
-				"RouteTableId": {"Ref": "RouteTablePrivate"}
+				"RouteTableId": {"Ref": "RouteTablePrivateA"}
 			}
 		},
 		"RouteTableAssociationBPublic": {
@@ -177,7 +197,7 @@
 			"Type": "AWS::EC2::SubnetRouteTableAssociation",
 			"Properties": {
 				"SubnetId": {"Ref": "SubnetBPrivate"},
-				"RouteTableId": {"Ref": "RouteTablePrivate"}
+				"RouteTableId": {"Ref": "RouteTablePrivateB"}
 			}
 		},
 		"RouteTableAssociationCPublic": {
@@ -191,7 +211,7 @@
 			"Type": "AWS::EC2::SubnetRouteTableAssociation",
 			"Properties": {
 				"SubnetId": {"Ref": "SubnetCPrivate"},
-				"RouteTableId": {"Ref": "RouteTablePrivate"}
+				"RouteTableId": {"Ref": "RouteTablePrivateC"}
 			}
 		},
 		"RouteTablePublicInternetRoute": {
@@ -318,14 +338,14 @@
 		"NatGatewayA": {
 			"Type": "AWS::EC2::NatGateway",
 			"Properties": {
-				"AllocationId": {"Fn::GetAtt": ["EIP", "AllocationId"]},
-				"SubnetId": {"Ref": "PublicSubnetA"}
+				"AllocationId": {"Fn::GetAtt": ["EIPA", "AllocationId"]},
+				"SubnetId": {"Ref": "SubnetAPublic"}
 			}
 		},
 		"RouteA": {
 			"Type": "AWS::EC2::Route",
 			"Properties": {
-				"RouteTableId": {"Ref": "RouteTablePrivate"},
+				"RouteTableId": {"Ref": "RouteTablePrivateA"},
 				"DestinationCidrBlock": "0.0.0.0/0",
 				"NatGatewayId": {"Ref": "NatGatewayA"}
 			}
@@ -339,14 +359,14 @@
 		"NatGatewayB": {
 			"Type": "AWS::EC2::NatGateway",
 			"Properties": {
-				"AllocationId": {"Fn::GetAtt": ["EIP", "AllocationId"]},
-				"SubnetId": {"Ref": "PublicSubnetB"}
+				"AllocationId": {"Fn::GetAtt": ["EIPB", "AllocationId"]},
+				"SubnetId": {"Ref": "SubnetBPublic"}
 			}
 		},
 		"RouteB": {
 			"Type": "AWS::EC2::Route",
 			"Properties": {
-				"RouteTableId": {"Ref": "RouteTablePrivate"},
+				"RouteTableId": {"Ref": "RouteTablePrivateB"},
 				"DestinationCidrBlock": "0.0.0.0/0",
 				"NatGatewayId": {"Ref": "NatGatewayB"}
 			}
@@ -360,14 +380,14 @@
 		"NatGatewayC": {
 			"Type": "AWS::EC2::NatGateway",
 			"Properties": {
-				"AllocationId": {"Fn::GetAtt": ["EIP", "AllocationId"]},
-				"SubnetId": {"Ref": "PublicSubnetC"}
+				"AllocationId": {"Fn::GetAtt": ["EIPC", "AllocationId"]},
+				"SubnetId": {"Ref": "SubnetCPublic"}
 			}
 		},
 		"RouteC": {
 			"Type": "AWS::EC2::Route",
 			"Properties": {
-				"RouteTableId": {"Ref": "RouteTablePrivate"},
+				"RouteTableId": {"Ref": "RouteTablePrivateC"},
 				"DestinationCidrBlock": "0.0.0.0/0",
 				"NatGatewayId": {"Ref": "NatGatewayC"}
 			}
@@ -401,14 +421,6 @@
 		"SubnetCPrivate": {
 			"Description": "Subnet C private.",
 			"Value": {"Ref": "SubnetCPrivate"}
-		},
-		"RouteTablePrivate": {
-			"Description": "Route table private.",
-			"Value": {"Ref": "RouteTablePrivate"}
-		},
-		"RouteTablePublic": {
-			"Description": "Route table public.",
-			"Value": {"Ref": "RouteTablePublic"}
 		}
 	}
 }
