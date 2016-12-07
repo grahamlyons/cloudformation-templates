@@ -5,10 +5,20 @@
 		"ClassB": {
 			"Description": "Class B of VPC (10.XXX.0.0/16)",
 			"Type": "String",
+      "Default": "10",
 			"MinLength": "1",
 			"MaxLength": "3"
-		}
+		},
+    "OutboundFromPrivateSubnets": {
+      "Description": "Class B of VPC (10.XXX.0.0/16)",
+			"Type": "String",
+      "AllowedValues" : ["true", "false"],
+      "Default": "false"
+    }
 	},
+  "Conditions": {
+    "CreateNatGateways" : {"Fn::Equals" : [{"Ref" : "OutboundFromPrivateSubnets"}, "true"]}
+  },
 	"Resources": {
 		"VPC": {
 			"Type": "AWS::EC2::VPC",
@@ -331,12 +341,14 @@
 		},
 		"EIPA": {
 			"Type": "AWS::EC2::EIP",
+      "Condition" : "CreateNatGateways",
 			"Properties": {
 				"Domain": "vpc"
 			}
 		},
 		"NatGatewayA": {
 			"Type": "AWS::EC2::NatGateway",
+      "Condition" : "CreateNatGateways",
 			"Properties": {
 				"AllocationId": {"Fn::GetAtt": ["EIPA", "AllocationId"]},
 				"SubnetId": {"Ref": "SubnetAPublic"}
@@ -344,6 +356,7 @@
 		},
 		"RouteA": {
 			"Type": "AWS::EC2::Route",
+      "Condition" : "CreateNatGateways",
 			"Properties": {
 				"RouteTableId": {"Ref": "RouteTablePrivateA"},
 				"DestinationCidrBlock": "0.0.0.0/0",
@@ -352,12 +365,14 @@
 		},
 		"EIPB": {
 			"Type": "AWS::EC2::EIP",
+      "Condition" : "CreateNatGateways",
 			"Properties": {
 				"Domain": "vpc"
 			}
 		},
 		"NatGatewayB": {
 			"Type": "AWS::EC2::NatGateway",
+      "Condition" : "CreateNatGateways",
 			"Properties": {
 				"AllocationId": {"Fn::GetAtt": ["EIPB", "AllocationId"]},
 				"SubnetId": {"Ref": "SubnetBPublic"}
@@ -365,6 +380,7 @@
 		},
 		"RouteB": {
 			"Type": "AWS::EC2::Route",
+      "Condition" : "CreateNatGateways",
 			"Properties": {
 				"RouteTableId": {"Ref": "RouteTablePrivateB"},
 				"DestinationCidrBlock": "0.0.0.0/0",
@@ -373,12 +389,14 @@
 		},
 		"EIPC": {
 			"Type": "AWS::EC2::EIP",
+      "Condition" : "CreateNatGateways",
 			"Properties": {
 				"Domain": "vpc"
 			}
 		},
 		"NatGatewayC": {
 			"Type": "AWS::EC2::NatGateway",
+      "Condition" : "CreateNatGateways",
 			"Properties": {
 				"AllocationId": {"Fn::GetAtt": ["EIPC", "AllocationId"]},
 				"SubnetId": {"Ref": "SubnetCPublic"}
@@ -386,6 +404,7 @@
 		},
 		"RouteC": {
 			"Type": "AWS::EC2::Route",
+      "Condition" : "CreateNatGateways",
 			"Properties": {
 				"RouteTableId": {"Ref": "RouteTablePrivateC"},
 				"DestinationCidrBlock": "0.0.0.0/0",
