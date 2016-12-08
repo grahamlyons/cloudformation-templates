@@ -2,24 +2,24 @@
 	"AWSTemplateFormatVersion": "2010-09-09",
 	"Description": "A VPC with public and private subnets across 3 availability zones",
 	"Parameters": {
-		"ClassB": {
+        "ClassB": {
 			"Description": "Class B of VPC (10.XXX.0.0/16)",
 			"Type": "String",
-      "Default": "10",
+            "Default": "10",
 			"MinLength": "1",
 			"MaxLength": "3"
 		},
-    "OutboundFromPrivateSubnets": {
-      "Description": "Class B of VPC (10.XXX.0.0/16)",
+        "OutboundFromPrivateSubnets": {
+            "Description": "Class B of VPC (10.XXX.0.0/16)",
 			"Type": "String",
-      "AllowedValues" : ["true", "false"],
-      "Default": "false"
-    }
+            "AllowedValues" : ["true", "false"],
+            "Default": "false"
+        }
 	},
-  "Conditions": {
-    "CreateNatGateways" : {"Fn::Equals" : [{"Ref" : "OutboundFromPrivateSubnets"}, "true"]}
-  },
-	"Resources": {
+    "Conditions": {
+        "CreateNatGateways" : {"Fn::Equals" : [{"Ref" : "OutboundFromPrivateSubnets"}, "true"]}
+    },
+    "Resources": {
 		"VPC": {
 			"Type": "AWS::EC2::VPC",
 			"Properties": {
@@ -162,7 +162,7 @@
 				}]
 			}
 		},
-    "RouteTablePrivateB": {
+        "RouteTablePrivateB": {
 			"Type": "AWS::EC2::RouteTable",
 			"Properties": {
 				"VpcId": {"Ref": "VPC"},
@@ -172,7 +172,7 @@
 				}]
 			}
 		},
-    "RouteTablePrivateC": {
+        "RouteTablePrivateC": {
 			"Type": "AWS::EC2::RouteTable",
 			"Properties": {
 				"VpcId": {"Ref": "VPC"},
@@ -341,14 +341,14 @@
 		},
 		"EIPA": {
 			"Type": "AWS::EC2::EIP",
-      "Condition" : "CreateNatGateways",
+            "Condition" : "CreateNatGateways",
 			"Properties": {
 				"Domain": "vpc"
 			}
 		},
 		"NatGatewayA": {
 			"Type": "AWS::EC2::NatGateway",
-      "Condition" : "CreateNatGateways",
+            "Condition" : "CreateNatGateways",
 			"Properties": {
 				"AllocationId": {"Fn::GetAtt": ["EIPA", "AllocationId"]},
 				"SubnetId": {"Ref": "SubnetAPublic"}
@@ -356,7 +356,7 @@
 		},
 		"RouteA": {
 			"Type": "AWS::EC2::Route",
-      "Condition" : "CreateNatGateways",
+            "Condition" : "CreateNatGateways",
 			"Properties": {
 				"RouteTableId": {"Ref": "RouteTablePrivateA"},
 				"DestinationCidrBlock": "0.0.0.0/0",
@@ -365,14 +365,14 @@
 		},
 		"EIPB": {
 			"Type": "AWS::EC2::EIP",
-      "Condition" : "CreateNatGateways",
+            "Condition" : "CreateNatGateways",
 			"Properties": {
 				"Domain": "vpc"
 			}
 		},
 		"NatGatewayB": {
 			"Type": "AWS::EC2::NatGateway",
-      "Condition" : "CreateNatGateways",
+            "Condition" : "CreateNatGateways",
 			"Properties": {
 				"AllocationId": {"Fn::GetAtt": ["EIPB", "AllocationId"]},
 				"SubnetId": {"Ref": "SubnetBPublic"}
@@ -380,7 +380,7 @@
 		},
 		"RouteB": {
 			"Type": "AWS::EC2::Route",
-      "Condition" : "CreateNatGateways",
+            "Condition" : "CreateNatGateways",
 			"Properties": {
 				"RouteTableId": {"Ref": "RouteTablePrivateB"},
 				"DestinationCidrBlock": "0.0.0.0/0",
@@ -389,14 +389,14 @@
 		},
 		"EIPC": {
 			"Type": "AWS::EC2::EIP",
-      "Condition" : "CreateNatGateways",
+            "Condition" : "CreateNatGateways",
 			"Properties": {
 				"Domain": "vpc"
 			}
 		},
 		"NatGatewayC": {
 			"Type": "AWS::EC2::NatGateway",
-      "Condition" : "CreateNatGateways",
+            "Condition" : "CreateNatGateways",
 			"Properties": {
 				"AllocationId": {"Fn::GetAtt": ["EIPC", "AllocationId"]},
 				"SubnetId": {"Ref": "SubnetCPublic"}
@@ -404,7 +404,7 @@
 		},
 		"RouteC": {
 			"Type": "AWS::EC2::Route",
-      "Condition" : "CreateNatGateways",
+            "Condition" : "CreateNatGateways",
 			"Properties": {
 				"RouteTableId": {"Ref": "RouteTablePrivateC"},
 				"DestinationCidrBlock": "0.0.0.0/0",
