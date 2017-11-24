@@ -10,7 +10,7 @@
 			"MaxLength": "3"
 		},
         "OutboundFromPrivateSubnets": {
-            "Description": "Class B of VPC (10.XXX.0.0/16)",
+            "Description": "Allow outbound traffic from private subnets i.e. provision NAT gateways",
 			"Type": "String",
             "AllowedValues" : ["true", "false"],
             "Default": "false"
